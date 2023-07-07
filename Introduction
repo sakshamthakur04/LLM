@@ -1,0 +1,17 @@
+Introduction 
+
+This code demonstrates the implementation of a Language Model (LM) using the Natural Language Toolkit (NLTK) library. The LM is trained on a given text corpus and used to generate coherent and contextually relevant text based on a given prompt. The code also includes an example of using the LM to answer specific questions related to the provided text.
+
+The code begins by importing the necessary libraries, including NLTK, random, and defaultdict from collections. It also downloads the required NLTK data for tokenization. The provided text is then tokenized into individual words using NLTK's word_tokenize function.
+
+Next, the code generates bigrams (pairs of consecutive words) from the tokenized text. It creates a defaultdict of Counters to store the frequency of each word following a specific word. This frequency information is used to generate the next word based on the current word in the text generation process.
+
+The code defines a function, generate_text, which takes a seed word and the desired number of words to generate. It generates text by randomly selecting the next word based on the frequency information stored in the bigram_freq defaultdict.
+
+After that, the code includes a section for testing the LM model. It combines the original text with some additional text and tokenizes it into sentences and words. Then, it uses NLTK's padded_everygram_pipeline function to prepare the training data and obtain padded sentences.
+
+An MLE (Maximum Likelihood Estimation) model is created using NLTK's MLE class. It is trained on the padded training data. The code defines another function, generate_text, which uses the trained LM model to generate text given a prompt and the desired number of words.
+
+Finally, the code includes a list of example questions. For each question, it uses the generate_text function with the LM model to generate a response. The generated response attempts to answer the question based on the information learned from the training data.
+
+Overall, this code demonstrates the implementation of an LM using NLTK and showcases its ability to generate text and answer specific questions based on the provided training data.
