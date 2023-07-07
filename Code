@@ -1,0 +1,74 @@
+# Building our LLM 
+
+import nltk
+import random
+from nltk.util import ngrams
+from collections import defaultdict, Counter
+
+
+text = """The food at this restaurant is absolutely delicious! I had the steak and it was cooked to perfection. The service was also top-notch. I highly recommend this place. 
+I was very disappointed with my experience at this restaurant. The food was cold and tasted bland. The service was slow and the staff seemed disinterested. I will not be returning. 
+This restaurant has a great ambiance and the staff is friendly. The menu has a wide variety of options, and the food is consistently good. I've been here multiple times and have never been disappointed. 
+I had a wonderful dining experience at this restaurant. The food was excellent, and the presentation was beautiful. The servers were attentive and knowledgeable. I will definitely be coming back. 
+The prices at this restaurant are quite high compared to the portion sizes. The food was decent, but I felt like I didn't get my money's worth. The service was average. 
+I absolutely love this restaurant! The food is always fresh and flavorful. The service is prompt and friendly. It's a great place for a casual meal or a special occasion."""
+
+nltk.download('punkt')
+tokens = nltk.word_tokenize(text.lower())
+print(tokens)
+
+bigrams = list(ngrams(tokens, 2))
+bigram_freq = defaultdict(Counter)
+
+for w1, w2 in bigrams:
+    bigram_freq[w1][w2] += 1
+
+print(bigram_freq)
+
+def generate_text(seed, n_words):
+    result = [seed]
+    for _ in range(n_words):
+        next_word_options = bigram_freq[result[-1]]
+        next_word = random.choices(list(next_word_options.keys()), list(next_word_options.values()))[0]
+        result.append(next_word)
+    return ' '.join(result)
+
+generated_text = generate_text('dining', 5)
+print(generated_text)
+
+# Testing the LLM model
+
+from nltk import word_tokenize, sent_tokenize
+from nltk.lm import MLE
+from nltk.lm.preprocessing import padded_everygram_pipeline
+
+old_text = text
+new_text = """The atmosphere of this restaurant is cozy and inviting. The menu has a good selection of vegetarian options, which is a plus for me. The prices are reasonable, and the staff is helpful. "I had a terrible experience at this restaurant. The food took forever to arrive, and when it did, it was cold. The servers were rude and inattentive. I will never recommend this place to anyone. This restaurant is a hidden gem! The food is authentic and bursting with flavor. The staff is knowledgeable and passionate about the cuisine. I highly recommend trying their signature dish. I visited this restaurant for a business lunch, and it was perfect. The service was quick, and the food was delicious. The restaurant had a professional atmosphere, making it ideal for meetings. I had high expectations for this restaurant, but unfortunately, it fell short. The food was mediocre at best, and the portions were small for the price. The service was average, nothing remarkable. "I've been a regular customer at this restaurant for years, and it never disappoints. The quality of the food is consistently excellent, and the staff treats you like family. It's my go-to place for special occasions. The decor of this restaurant is stunning, and the ambiance is perfect for a romantic dinner. However, the food was a bit underwhelming. It lacked the flavor and creativity I was expecting. I had a great time at this restaurant with my friends. The cocktails were delicious, and the appetizers were delightful. The only downside was that the main courses took longer than expected to arrive. I'm a vegetarian, and this restaurant has a fantastic selection of plant-based options. The flavors are vibrant, and the dishes are beautifully presented. It's refreshing to find a place that caters to vegetarians so well. I found the service at this restaurant to be quite slow and unresponsive. It took ages for someone to take our order, and the wait between courses was excessive. The food, however, was decent. This restaurant is a bit overrated in my opinion. The prices are steep, and while the food is good, it's not exceptional. I expected more given the hype surrounding it."""
+combined_text = old_text + " " + new_text
+
+sent_tokens = sent_tokenize(combined_text)
+word_tokens = [word_tokenize(t) for t in sent_tokens]
+
+n = 3
+train_data, padded_sents = padded_everygram_pipeline(n, word_tokens)
+
+model = MLE(n)
+model.fit(train_data, padded_sents)
+
+def generate_text(prompt, num_words, model):
+    word_list = model.generate(num_words, text_seed=prompt.split())
+    response = ' '.join(word_list)
+    return response
+
+# Example questions
+questions = [
+    "Did any review mention a long wait time for the main courses?",
+    "What did the reviewer love about the restaurant?",
+"Which review talked about the restaurant being a hidden gem?",
+"Was there a review that mentioned the availability of vegetarian options?"
+]
+
+for question in questions:
+    print(f"Question: {question}")
+    print(f"Answer: {generate_text(question, 20, model)}")
+    print("\n")
